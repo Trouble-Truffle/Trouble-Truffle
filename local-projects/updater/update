@@ -1,0 +1,160 @@
+#!/bin/bash
+
+#Initializing Variables
+default_pull="git pull"
+default_compile="make"
+default_clean="make clean"
+default_install="make install"
+
+programName=$0
+helpPage(){
+echo -e "Usage: $0 [-[uU][aA][qQ][rR]Pp[Cc][Ii]] \n                                                                                         "
+echo -e "Worflow:                                                                                                                      "
+echo -e "    -U, -[Aa], --Update, --All       Activate all workflow commands                                                           "
+echo -e "    -P, --Pull                          Pull from repositories                                                                   "
+echo -e "    -c, --Compile                       Compile source                                                                           "
+echo -e "    -C, --Clean                         Clean                                                                                    "
+echo -e "    -[Ii], --Install                    Install compiled files\n                                                                 "
+echo -e "Method:                                                                                                                          "
+echo -e "    -p, --Pretend                       Show workflow without making changes                                                     "
+echo -e "    -[Qq], --Quiet                      Silence Output                                                                           "
+echo -e "    -[Vv], --Verbose                    Verbose Output                                                                           "
+echo -e "    -[Rr], --Recurse, --Recursive       Compile including Submodules\n                                                           "
+echo -e "    -u ''. --use=''                     Specify flags "
+echo -e "updateFiles:                                                                                                                     "
+echo -e "For projects with specific compile options, you can specify the commands required with an 'updateFile' (case sensitive) text file.\nThe format is {workflow}: {commands}"
+}
+
+pull=false
+compile=false
+install=false
+pretend=false
+quiet=false
+recursive=false
+clean=false
+verbose=false
+
+if [ -z $@ ] 
+then
+    pull=true
+    compile=true
+else
+    for args in $@; 
+    do 
+        if [[ $args == --[!-]* ]]; then args=${args:2}; fi
+        case $args in
+            [Uu][Pp][Dd][Aa][Tt][Ee] | [Aa][Ll][Ll])
+                pull=true
+                compile=true
+                install=true
+                ;;
+            [Pp][Rr][Ee][Tt][Ee][Nn][Dd])
+                pretend=true
+                ;;
+            [Qq][Uu][Ii][Ee][Tt])
+                quiet=true
+                ;;
+            [Rr][Ee][Cc][Uu][Rr][Ss][Ee] | [Rr][Ee][Cc][Uu][Rr][Ss][Ii][Vv][Ee])
+                recursive=true
+                ;;
+            [Pp][Uu][Ll][Ll])
+                pull=true
+                ;;
+            [Cc][Oo][Mm][Pp][Ii][Ll][Ee])
+                compile=true
+                ;;
+            [Ii][Nn][Ss][Tt][Aa][Ll][Ll])
+                install=true
+                ;;
+            [Hh][Ee][Ll][Pp])
+                helpPage
+                exit 0
+                ;;
+            [Cc][Ll][Ee][Aa][Nn])
+                clean=true
+                ;;
+            [Vv][Ee][Rr][Bb][Oo][Ss][Ee])
+                verbose=true
+                ;;
+            -[^-]*)
+                for i in $(seq 1 $(echo "${#args} - 1" | bc))
+                do
+                    case ${args:i:1} in
+                        [Uu] | [Aa]) 
+                            pull=true
+                            compile=true
+                            install=true
+                            ;;
+                        p)
+                            pretend=true
+                            ;;
+                        [Qq])
+                            quiet=true
+                            ;;
+                        [Rr])
+                            recursive=true
+                            ;;
+                        C)
+                            clean=true
+                            ;;
+                        c)
+                            compile=true
+                            ;;
+                        P)
+                            pull=true
+                            ;;
+                        [Ii])
+                            install=true
+                            ;;
+                        [Vv])
+                            verbose=true
+                            ;;
+                        [Hh])
+                            helpPage
+                            exit 0
+                            ;;
+                        *)
+                            echo -e "'${args:i:1}' is not a recognized parameter"
+                            exit 1
+                            ;;
+                    esac
+                done
+                ;;
+            *)
+                echo -e "'$args' is not a recognized parameter \n"
+                helpPage
+                exit 1
+        esac
+    done
+fi
+
+#CD'ing into directories
+dirs=""
+for i in *; 
+do
+   if [ -d $i ]
+   then
+       dirs=(${dirs[@]} $i)
+   fi
+done
+Progress=1
+Total=${#dirs[@]}
+for i in ${dirs[*]};
+do 
+    echo -e "\033[34m$(pwd)/$i/ \033[32m[\033[1;32m$((Progress++))/$Total\033[32m]\033[0m"
+    if [ -f $i/updateFile ]
+    then
+        if $verbose
+        then 
+            echo -e "\033[1;3m----------------UPDATEFILE---------------------\033[0m"
+            cat $i/updateFile
+            echo -e "\033[1;3m-----------------------------------------------\033[0m"
+        fi
+    else
+        if ! $quiet; then
+            echo -e "   \033[33m!!! No updateFile in './$i/' skipping..\033[0m"
+        fi
+    fi
+done
+
+echo -e "\033[32mUpdater has finished running"
