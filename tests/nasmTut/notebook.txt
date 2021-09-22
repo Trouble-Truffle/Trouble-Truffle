@@ -1,8 +1,44 @@
 Registers:
-    ebx -- 
-        File descriptors
-    eax -- 
-        System Call numbers
+
+    quickInfo: (*X | r[0-15])=Data- (*P)=Pointer- (*I)=Index- (*F)=Control- -Registers
+
+    data registers;
+        size info:
+            ( XMM[0-15],              = 128bit ),
+            ( R[0-15],  R[abcd][xpi], = 64bit ), 
+            ( R[0-15]D, E[abcd][xpi], = 32bit), 
+            ( R[0-15]W, [abcd][xpi],  = 16bit),
+            ( R[0-15]B, [abcd][ pi]l, = 8bit down),
+            ( ,[abch]h,               = 8bit up)
+
+    r[0-15]
+
+    ax -- DESC: primary accumulator, used in IO and Arithmetic.
+        examples: System Call numbers
+
+    bx -- DESC: base register, used for indexed addressing.
+        examples: File descriptors
+
+    cx -- DESC: count register, stores loop count in iterative operations.
+
+    dx -- DESC: data register.
+
+
+    pointer registers;
+
+    ip -- DESC: stores offset address of next instruction,
+    sp -- DESC: stores offset value within the stack
+    bp -- DESC: references parameter variables
+
+    index registers:
+    si -- DESC: source index for string operations
+    di -- DESC: destination index for string operations
+
+
+Instructions:
+    jne -- Jump if Not Equal
 
 File Descriptors:
     1 - STDOUT
+
+
