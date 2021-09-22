@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/truff/.local/src/Perigord/local-projects/updater/build",
+  "command": "/usr/bin/x86_64-pc-linux-gnu-g++-11.2.0 -g -std=gnu++17 -o CMakeFiles/updater.dir/Main.cpp.o -c /home/truff/.local/src/Perigord/local-projects/updater/Main.cpp",
+  "file": "/home/truff/.local/src/Perigord/local-projects/updater/Main.cpp"
+},
+{
+  "directory": "/home/truff/.local/src/Perigord/local-projects/updater/build",
+  "command": "/usr/bin/x86_64-pc-linux-gnu-g++-11.2.0 -g -std=gnu++17 -o src/CMakeFiles/src_dir.dir/Parser.cpp.o -c /home/truff/.local/src/Perigord/local-projects/updater/src/Parser.cpp",
+  "file": "/home/truff/.local/src/Perigord/local-projects/updater/src/Parser.cpp"
+},
+{
+  "directory": "/home/truff/.local/src/Perigord/local-projects/updater/build",
+  "command": "/usr/bin/x86_64-pc-linux-gnu-g++-11.2.0 -g -std=gnu++17 -o src/CMakeFiles/src_dir.dir/Dir.cpp.o -c /home/truff/.local/src/Perigord/local-projects/updater/src/Dir.cpp",
+  "file": "/home/truff/.local/src/Perigord/local-projects/updater/src/Dir.cpp"
+},
+{
+  "directory": "/home/truff/.local/src/Perigord/local-projects/updater/build",
+  "command": "/usr/bin/x86_64-pc-linux-gnu-g++-11.2.0 -g -std=gnu++17 -o src/CMakeFiles/src_dir.dir/ArgHandler.cpp.o -c /home/truff/.local/src/Perigord/local-projects/updater/src/ArgHandler.cpp",
+  "file": "/home/truff/.local/src/Perigord/local-projects/updater/src/ArgHandler.cpp"
+}
+]
