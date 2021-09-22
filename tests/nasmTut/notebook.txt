@@ -1,0 +1,8 @@
+Registers:
+    ebx -- 
+        File descriptors
+    eax -- 
+        System Call numbers
+
+File Descriptors:
+    1 - STDOUT

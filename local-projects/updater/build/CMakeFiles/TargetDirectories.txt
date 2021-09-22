@@ -1,6 +1,0 @@
-/home/truff/.local/src/Perigord/local-projects/updater/build/CMakeFiles/rebuild_cache.dir
-/home/truff/.local/src/Perigord/local-projects/updater/build/CMakeFiles/edit_cache.dir
-/home/truff/.local/src/Perigord/local-projects/updater/build/CMakeFiles/updater.dir
-/home/truff/.local/src/Perigord/local-projects/updater/build/src/CMakeFiles/rebuild_cache.dir
-/home/truff/.local/src/Perigord/local-projects/updater/build/src/CMakeFiles/edit_cache.dir
-/home/truff/.local/src/Perigord/local-projects/updater/build/src/CMakeFiles/src_dir.dir
