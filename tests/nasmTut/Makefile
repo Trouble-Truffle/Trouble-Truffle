@@ -16,5 +16,4 @@ Link:
 	ld ${OBJ} -o ${EXE}
 
 Run:
-	./${EXE}
-
+	./run.sh ${EXE}

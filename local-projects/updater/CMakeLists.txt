@@ -8,3 +8,7 @@ add_subdirectory("src")
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC src_dir)
+
+add_custom_target(run
+    ./${PROJECT_NAME}
+    )

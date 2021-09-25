@@ -2,6 +2,7 @@
 
 int main(int argc, char **argv, char **argenv)
 {
-    printTest();
-    std::cout << listDir() << std::endl;
+    argHandler args(argenv);
+
+    return 0;
 }
