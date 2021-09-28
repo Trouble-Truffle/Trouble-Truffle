@@ -1,0 +1,132 @@
+#!/bin/bash
+programName=$0
+
+declare -a comArray=(
+    [pull]=true
+    [compile]=true
+    [install]=false
+    [pretend]=false
+    [quiet]=false
+    [clean]=false
+    [verbose]=false
+    [help]=false
+    [nocol]=false
+    [nodeps]=false
+    [directory]=false
+    [root]=false
+    [recursive]=false
+    [debug]=false
+    [oneshot]=false
+)
+
+function preProccessArgs()
+{
+    declare argArr=()
+    declare invalidArr=()
+    for arg in "$@"; do
+        if [[ -z "$arg" ]]; then argArr+=("all"); fi
+        if [[ $arg == --[!-]* ]]; then arg=${arg:2}; argArr+=("$arg");  #remove "--" from args
+        elif [[ "$arg" == -[^-]* ]]; then #remove "-" from args and extend abbreviations
+            arg=${arg:1}
+            for (( i=0; i < ${#arg}; i++ )); do
+                case ${arg:$i:1} in
+                    [0-9])          argArr+=("${arg:$i:1}"); ;;
+                    u | [Aa])       argArr+=("all") ;;
+                    C)              argArr+=("clean") ;;
+                    c)              argArr+=("compile") ;;
+                    d)              argArr+=("directory:") ;;
+                    D)              argArr+=("debug") ;;
+                    [Ee])           argArr+=("exclude") ;;
+                    [Hh])           argArr+=("help")   ;;
+                    [Ii])           argArr+=("install") ;;
+                    [jJ])           argArr+=("jobs:") ;;
+                    n)              argArr+=("nocol") ;;
+                    N)              argArr+=("nodeps") ;;
+                    [oO])           argArr+=("oneshot") ;;
+                    p)              argArr+=("pretend") ;;
+                    P)              argArr+=("pull") ;;
+                    [Qq])           argArr+=("quiet") ;;
+                    r)              argArr+=("recursive") ;;
+                    R)              argArr+=("root:") ;;
+                    U)              argArr+=("use:") ;;
+                    [Vv])           argArr+=("verbose") ;;
+                    *)              invalidArr+=("${arg:$i:1}") ;;
+                esac
+            done
+        else
+            argArr+=("$arg")
+        fi
+    done
+    echo "args: ${argArr[*]}"
+    echo "errors: ${invalidArr[*]}"
+}
+
+function errorCheck()
+{
+    errorCheck=false
+    failure=false
+    declare errorArr=()
+
+    for args in $1; do
+        if ! $errorCheck; then
+            if [[ $args == args: ]]; then continue; fi
+            if [[ $args == errors: ]]; then errorCheck=true; fi
+            case $args in
+                [Cc][Ll][Ee][Aa][Nn])                   comArray[clean]=true        ;;
+                [Cc][Oo][Mm][Pp][Ii][Ll][Ee])           comArray[compile]=true      ;;
+                [Dd][Ee][Bb][Uu][Gg])                   comArray[debug]=true        ;;
+                [Hh][Ee][Ll][Pp])                       comArray[help]=true         ;;
+                [Nn][Oo][Cc][Oo][Ll])                   comArray[nocol]=true        ;;
+                [Nn][Oo][Dd][Ee][Pp][Ss])               comArray[nodeps]=true       ;;
+                [Oo][Nn][Ee][Ss][Hh][Oo][Tt])           comArray[oneshot]=true      ;;
+                [Pp][Rr][Ee][Tt][Ee][Nn][Dd])           comArray[pretend]=true      ;;
+                [Pp][Uu][Ll][Ll])                       comArray[pull]=true         ;;
+                [Qq][Uu][Ii][Ee][Tt])                   comArray[quiet]=true        ;;
+                [Rr][Ee][Cc][Uu][Rr][Ss][Ii][Vv][Ee])   comArray[recursive]=true    ;;
+                [Vv][Ee][Rr][Bb][Oo][Ss][Ee])           comArray[verbose]=true      ;;
+                *) 
+                    if $customDir; then workingDir=$args; customDir=false; fi
+                    ;&
+                [Aa][Ll][Ll] | [Uu][Pp][Dd][Aa][Tt][Ee] ) 
+                    comArray[pull]=true
+                    comArray[compile]=true
+                    ;;
+                [Dd][Ii][Rr][Ee][Cc][Tt][Oo][Rr][Yy][:=])
+                    comArray[directory]=true; customDir=true ;;
+                [Ee][Xx][Cc][Ll][Uu][Dd][Ee][:=]*)
+                    comArray[exclude]=true; excludeDir=true 
+                    IFS=$','
+                        for exDirs in $args; do
+                            echo "$exDirs"
+                        done
+                    unset IFS
+                    ;;
+                *)                                      errorArr+=("$args")         ;;
+            esac
+        else
+            errorArr+=("$args")
+            echo "${errorArr[*]}"
+            failure=true
+        fi
+    done
+    if $failure; then return 1 ; fi
+    echo "${comArray[debug]}"
+}
+
+parseArgs()
+{
+    args=$( errorCheck "$( preProccessArgs "$@")" )
+    if [ $? -eq 1 ]; then 
+        echo "$args"
+    exit 1; fi
+    echo "$args"
+    echo "program success"
+}
+
+#Main
+workingDir="$PWD"
+rootDir=""
+useFlags=""
+declare excludedDirs=()
+jobNum=1
+parseArgs "$@"

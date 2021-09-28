@@ -34,7 +34,7 @@ for:
 
 
 section .data
-    msg db "ello World?",0xa
+    msg db "Test",0xa
     len equ $ - msg
     stars times 10 db '*'
 

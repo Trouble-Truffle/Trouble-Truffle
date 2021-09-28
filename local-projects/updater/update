@@ -1,0 +1,201 @@
+#!/bin/bash
+
+#Initializing Variables
+programName=$0
+helpPage(){
+echo -e "Usage: $0 [-[uU][aA][qQ][rR]Pp[Cc][Ii]] \n                                                                                         "
+echo -e "Worflow:                                                                                                                      "
+echo -e "    -U, -[Aa], --Update, --All       Activate all workflow commands                                                           "
+echo -e "    -P, --Pull                          Pull from repositories                                                                   "
+echo -e "    -c, --Compile                       Compile source                                                                           "
+echo -e "    -C, --Clean                         Clean                                                                                    "
+echo -e "    -[Ii], --Install                    Install compiled files\n                                                                 "
+echo -e "Method:                                                                                                                          "
+echo -e "    -p, --Pretend                       Show workflow without making changes                                                     "
+echo -e "    -[Qq], --Quiet                      Silence Output                                                                           "
+echo -e "    -[Vv], --Verbose                    Verbose Output                                                                           "
+echo -e "    -[Rr], --Recurse, --Recursive       Compile including Subdirectories\n                                                       "
+echo -e "updateFiles:                                                                                                                     "
+echo -e "For projects with specific compile options, you can specify the commands required with an 'updateFile' (case sensitive) text file.\nThe format is {workflow}: {commands}, keep in mind that the order in updateFiles matters"
+echo -e "                                                                                                                                 "
+echo -e "                                                                                                                                 "
+
+}
+
+pull=false
+compile=false
+install=false
+pretend=false
+quiet=false
+recursive=false
+clean=false
+verbose=false
+
+if [ -z $@ ] 
+then
+    pull=true
+    compile=true
+else
+    for args in "$@"; 
+    do 
+        if [[ $args == --[!-]* ]]; then args=${args:2}; fi
+        case $args in
+            [Uu][Pp][Dd][Aa][Tt][Ee] | [Aa][Ll][Ll])
+                pull=true
+                compile=true
+                install=true
+                ;;
+            [Pp][Rr][Ee][Tt][Ee][Nn][Dd])
+                pretend=true
+                ;;
+            [Qq][Uu][Ii][Ee][Tt])
+                quiet=true
+                ;;
+            [Rr][Ee][Cc][Uu][Rr][Ss][Ee] | [Rr][Ee][Cc][Uu][Rr][Ss][Ii][Vv][Ee])
+                recursive=true
+                ;;
+            [Pp][Uu][Ll][Ll])
+                pull=true
+                ;;
+            [Cc][Oo][Mm][Pp][Ii][Ll][Ee])
+                compile=true
+                ;;
+            [Ii][Nn][Ss][Tt][Aa][Ll][Ll])
+                install=true
+                ;;
+            [Hh][Ee][Ll][Pp])
+                helpPage
+                exit 0
+                ;;
+            [Cc][Ll][Ee][Aa][Nn])
+                clean=true
+                ;;
+            [Vv][Ee][Rr][Bb][Oo][Ss][Ee])
+                verbose=true
+                ;;
+            -[^-]*)
+                for i in $(seq 1 $(echo "${#args} - 1" | bc))
+                do
+                    case ${args:i:1} in
+                        [Uu] | [Aa]) 
+                            pull=true
+                            compile=true
+                            install=true
+                            ;;
+                        p)
+                            pretend=true
+                            ;;
+                        [Qq])
+                            quiet=true
+                            ;;
+                        [Rr])
+                            recursive=true
+                            ;;
+                        C)
+                            clean=true
+                            ;;
+                        c)
+                            compile=true
+                            ;;
+                        P)
+                            pull=true
+                            ;;
+                        [Ii])
+                            install=true
+                            ;;
+                        [Vv])
+                            verbose=true
+                            ;;
+                        [Hh])
+                            helpPage
+                            exit 0
+                            ;;
+                        *)
+                            echo -e "'${args:i:1}' is not a recognized parameter"
+                            exit 1
+                            ;;
+                    esac
+                done
+                ;;
+            *)
+                echo -e "'$args' is not a recognized parameter \n"
+                helpPage
+                exit 1
+        esac
+    done
+fi
+
+#UpdateFile parsing
+
+updateFile(){
+    commandMode=false
+    label=""
+    while read -r line; do 
+
+    if [ "$2" == "readMode" ]; then echo "$line"; fi
+    if [[ $line == *[Ee][Xx][Ii][Tt]* ]]; then echo -e "\033[31m exit called: $i/updateFile: \"\033[2m$line\" \033[0m"; exit; fi 
+
+    if $commandMode; then
+        if [ -n "$line" ]; then
+            if $verbose; then echo -e "   \033[33mexecuting \033[0m$line"; fi
+            if ! $quiet; then echo -e "$line"; fi
+        fi
+        if [[ "$line" == *":"* || -z "$line" ]]; then
+            commandMode=false
+            if $verbose; then echo -e "\033[32mend of label\033[0m\n"; fi
+        fi
+    fi
+
+    if [ "$2" != "readMode" ]; then
+        if [[ "$line" == *":"* ]]; then
+        if $verbose; then echo -e "\033[33mLabel: \033[32;2m$line \033[0m"; fi
+        label=$line
+        commandMode=true
+    fi fi
+
+    done < "$1"/updateFile
+}
+
+#CD'ing into directories
+if ! $quiet; then 
+    echo -e  "\033[34mActions......................\033[0m"
+    echo -en "Quiet:      "; if $quiet       ;then echo -e "\033[32m  $quiet       \033[0m";   else echo -e "\033[31m $quiet     \033[0m"      ;fi
+    echo -en "Pretend:    "; if $pretend     ;then echo -e "\033[32m  $pretend     \033[0m";   else echo -e "\033[31m $pretend   \033[0m"      ;fi
+    echo -en "Verbose:    "; if $verbose     ;then echo -e "\033[32m  $verbose     \033[0m";   else echo -e "\033[31m $verbose   \033[0m"      ;fi
+    echo -en "Pull:       "; if $pull        ;then echo -e "\033[32m  $pull        \033[0m";   else echo -e "\033[31m $pull      \033[0m"      ;fi
+    echo -en "Compile:    "; if $compile     ;then echo -e "\033[32m  $compile     \033[0m";   else echo -e "\033[31m $compile   \033[0m"      ;fi
+    echo -en "Install:    "; if $install     ;then echo -e "\033[32m  $install     \033[0m";   else echo -e "\033[31m $install   \033[0m"      ;fi
+    echo -en "Clean:      "; if $clean       ;then echo -e "\033[32m  $clean       \033[0m";   else echo -e "\033[31m $clean     \033[0m"      ;fi
+    echo -en "Recursive:  "; if $recursive   ;then echo -e "\033[32m  $recursive   \033[0m";   else echo -e "\033[31m $recursive \033[0m"      ;fi
+    echo -e "\033[34m-----------------------------\033[0m\n\n"
+    fi
+sleep 1
+
+dirs=""
+for i in *; 
+do
+   if [ -d "$i" ]
+   then
+       dirs=(${dirs[@]} $i)
+   fi
+done
+Progress=1
+Total=${#dirs[@]}
+
+for i in ${dirs[*]};
+do 
+    echo -e "\033[34m$(pwd)/$i/ \033[32m[\033[1;32m$((Progress++))/$Total\033[32m]\033[0m"
+    if [ -f "$i"/updateFile ]
+    then
+        if $verbose
+        then 
+            echo -e "\033[1;3m----------------UPDATEFILE---------------------\033[0m"
+            if ! $pretend; then updateFile "$i"; else updateFile "$i" "readMode"; fi
+            echo -e "\033[1;3m-----------------------------------------------\033[0m"
+        else
+            updateFile "$i"
+        fi
+    elif ! $quiet; then
+            echo -e "   \033[33m!!! No updateFile in './$i/' skipping..\033[0m"
+    fi
+done
